@@ -285,50 +285,91 @@
 
     log("Ruby JS APIを使用して初期化します")
 
-    # くじデータとアプリケーションの状態
-    state = {
-      prizes: [
+    # 賞品データをData.defineで定義
+    Prize = Data.define(:name, :description, :probability, :color, :icon, :animation) do
+      # 表示用のメソッド
+      def to_h
         {
-          name: "特等賞",
-          description: "豪華旅行券",
-          probability: 0.05,
-          color: "linear-gradient(135deg, #FFD700, #FFA500)",
-          icon: "🏆",
-          animation: "sparkle"
-        },
-        {
-          name: "1等",
-          description: "ギフトカード5000円分",
-          probability: 0.1,
-          color: "linear-gradient(135deg, #E6E6FA, #C0C0C0)",
-          icon: "🎁",
-          animation: "bounce"
-        },
-        {
-          name: "2等",
-          description: "選べるグルメギフト",
-          probability: 0.15,
-          color: "linear-gradient(135deg, #CD853F, #CD7F32)",
-          icon: "🍰",
-          animation: "rotate"
-        },
-        {
-          name: "3等",
-          description: "オリジナルグッズ",
-          probability: 0.3,
-          color: "linear-gradient(135deg, #98FB98, #ADFF2F)",
-          icon: "🎨",
-          animation: "pulse"
-        },
-        {
-          name: "4等",
-          description: "お菓子詰め合わせ",
-          probability: 0.4,
-          color: "linear-gradient(135deg, #87CEFA, #1E90FF)",
-          icon: "🍬",
-          animation: "shake"
+          name: name,
+          description: description,
+          color: color,
+          icon: icon,
+          animation: animation
         }
-      ],
+      end
+    end
+
+    # 賞品コレクションクラス
+    class PrizeCollection
+      def initialize
+        @prizes = [
+          Prize.new(
+            name: "特等賞",
+            description: "豪華旅行券",
+            probability: 0.05,
+            color: "linear-gradient(135deg, #FFD700, #FFA500)",
+            icon: "🏆",
+            animation: "sparkle"
+          ),
+          Prize.new(
+            name: "1等",
+            description: "ギフトカード5000円分",
+            probability: 0.1,
+            color: "linear-gradient(135deg, #E6E6FA, #C0C0C0)",
+            icon: "🎁",
+            animation: "bounce"
+          ),
+          Prize.new(
+            name: "2等",
+            description: "選べるグルメギフト",
+            probability: 0.15,
+            color: "linear-gradient(135deg, #CD853F, #CD7F32)",
+            icon: "🍰",
+            animation: "rotate"
+          ),
+          Prize.new(
+            name: "3等",
+            description: "オリジナルグッズ",
+            probability: 0.3,
+            color: "linear-gradient(135deg, #98FB98, #ADFF2F)",
+            icon: "🎨",
+            animation: "pulse"
+          ),
+          Prize.new(
+            name: "4等",
+            description: "お菓子詰め合わせ",
+            probability: 0.4,
+            color: "linear-gradient(135deg, #87CEFA, #1E90FF)",
+            icon: "🍬",
+            animation: "shake"
+          )
+        ]
+      end
+
+      # 確率に基づいて賞品を選択するメソッド
+      def draw(random_value)
+        cumulative_probability = 0
+
+        @prizes.each do |prize|
+          cumulative_probability += prize.probability
+          return prize if random_value <= cumulative_probability
+        end
+
+        # 万が一確率の合計が1に満たない場合は最後の賞品を返す
+        @prizes.last
+      end
+
+      # 全賞品を取得
+      def all
+        @prizes
+      end
+    end
+
+    # くじのコレクションをインスタンス化
+    prize_collection = PrizeCollection.new
+
+    # アプリケーションの状態（賞品データは除外）
+    state = {
       result: nil,
       drawing: false
     }
@@ -353,18 +394,9 @@
               begin
                 # 確率に基づいた抽選ロジック
                 rand = window[:Math].random.to_f
-                cumulative_probability = 0
-                selected_prize = nil
+                selected_prize = prize_collection.draw(rand)
 
-                state[:prizes].each do |prize|
-                  cumulative_probability += prize[:probability]
-                  if rand <= cumulative_probability
-                    selected_prize = prize
-                    break
-                  end
-                end
-
-                log("抽選結果: #{selected_prize[:name]}")
+                log("抽選結果: #{selected_prize.name}")
                 # 結果をstateに反映させる
                 actions[:set_result].call(state, { prize: selected_prize, actions: actions })
               rescue => e
@@ -387,8 +419,8 @@
           prize = options[:prize]
           actions = options[:actions]
 
-          puts "抽選結果を設定します: #{prize[:name]}"
-          state[:result] = prize
+          puts "抽選結果を設定します: #{prize.name}"
+          state[:result] = prize.to_h
           state[:drawing] = false
 
           # 紙吹雪を表示（JS APIを使用）
