@@ -216,18 +216,47 @@
       pointer-events: none;
       z-index: 100;
     }
+
+    #debug {
+      margin-top: 20px;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      text-align: left;
+      font-size: 12px;
+      max-height: 200px;
+      overflow-y: auto;
+      display: block;
+    }
+
+    .error {
+      color: red;
+      font-weight: bold;
+    }
   </style>
 </head>
 <body>
   <div id="app"></div>
+  <div id="debug"></div>
+
   <script src="https://getty104.github.io/ruby-wasm-vdom/index.js"></script>
   <script>
     console.log("JavaScriptが読み込まれました");
+
     // デバッグ用のエラーハンドラー
     window.onerror = function(message, source, lineno, colno, error) {
       console.error("JavaScriptエラー:", message, "行:", lineno, "列:", colno);
-      document.body.innerHTML += "<div style='color:red'>エラー: " + message + "</div>";
+      document.getElementById('debug').style.display = 'block';
+      document.getElementById('debug').innerHTML += "<div style='color:red'>エラー: " + message + "</div>";
       return true;
+    };
+
+    // Rubyからのログをキャプチャ
+    console.originalLog = console.log;
+    console.log = function() {
+      console.originalLog.apply(console, arguments);
+      document.getElementById('debug').style.display = 'block';
+      document.getElementById('debug').innerHTML += "<div>" + Array.from(arguments).join(' ') + "</div>";
     };
 
     // 紙吹雪エフェクト用の関数
@@ -258,6 +287,18 @@
   </script>
   <script type="text/ruby">
     puts "Rubyスクリプトが実行されました"
+
+    # グローバルオブジェクトへのアクセス
+    window = JS.global
+    document = JS.global[:document]
+    console = JS.global[:console]
+
+    # デバッグログ関数
+    def log(message)
+      JS.global[:console].log(message)
+    end
+
+    log("Ruby JS APIを使用して初期化します")
 
     # くじデータとアプリケーションの状態
     state = {
@@ -311,76 +352,131 @@
 
     # アクション定義
     actions = {
-      draw_lottery: ->(state, _value) {
-        puts "抽選を開始します"
-        return if state[:drawing]
+      draw_lottery: ->(state, options) {
+        begin
+          actions = options[:actions]
+          puts "抽選を開始します"
+          return if state[:drawing]
 
-        state[:drawing] = true
-        state[:animation_complete] = false
-        state[:result] = nil
+          state[:drawing] = true
+          state[:animation_complete] = false
+          state[:result] = nil
 
-        # 抽選アニメーション用のタイマー処理（JS側で実装）
-        `
-        console.log("抽選処理を開始します");
-        setTimeout(() => {
-          // 確率に基づいた抽選ロジック
-          const rand = Math.random();
-          let cumulativeProbability = 0;
-          let selectedPrize = null;
+          # 抽選アニメーション用のタイマー処理（JS APIを使用）
+          log("抽選処理を開始します")
 
-          for (const prize of state.prizes) {
-            cumulativeProbability += prize.probability;
-            if (rand <= cumulativeProbability) {
-              selectedPrize = prize;
-              break;
-            }
-          }
+          # JS.globalからsetTimeoutを呼び出す
+          window.setTimeout(
+            ->{
+              begin
+                # 確率に基づいた抽選ロジック
+                rand = window[:Math].random.to_f
+                cumulative_probability = 0
+                selected_prize = nil
 
-          console.log("抽選結果:", selectedPrize);
-          // 結果をstateに反映させる
-          actions.set_result.call(state, selectedPrize);
-        }, 3000);
-        `
+                state[:prizes].each do |prize|
+                  cumulative_probability += prize[:probability]
+                  if rand <= cumulative_probability
+                    selected_prize = prize
+                    break
+                  end
+                end
+
+                log("抽選結果: #{selected_prize[:name]}")
+                # 結果をstateに反映させる
+                actions[:set_result].call(state, { prize: selected_prize, actions: actions })
+              rescue => e
+                console.error("抽選処理中にエラーが発生しました:", e.to_s)
+                document_debug = document.getElementById("debug")
+                document_debug.innerHTML = document_debug.innerHTML + "<div class='error'>抽選処理中にエラーが発生しました: #{e.message}</div>"
+                # エラーが発生した場合は抽選状態をリセット
+                state[:drawing] = false
+              end
+            },
+            3000
+          )
+        rescue => e
+          puts "Rubyコード内でエラーが発生しました: #{e.message}"
+          puts e.backtrace.join("\n")
+          state[:drawing] = false
+        end
       },
 
-      set_result: ->(state, prize) {
-        puts "抽選結果を設定します: #{prize[:name]}"
-        state[:result] = prize
-        state[:drawing] = false
-        state[:animation_complete] = true
-        state[:confetti_active] = true
+      set_result: ->(state, options) {
+        begin
+          prize = options[:prize]
+          actions = options[:actions]
 
-        # 紙吹雪を表示（JS側で実装）
-        `
-        console.log("紙吹雪を表示します");
-        if (state.confetti_active) {
-          createConfetti();
+          puts "抽選結果を設定します: #{prize[:name]}"
+          state[:result] = prize
+          state[:drawing] = false
+          state[:animation_complete] = true
+          state[:confetti_active] = true
 
-          // 一定時間後に紙吹雪をクリア
-          setTimeout(() => {
-            actions.clear_confetti.call(state, null);
-          }, 5000);
-        }
-        `
+          # 紙吹雪を表示（JS APIを使用）
+          log("紙吹雪を表示します")
+
+          # confetti_activeの場合のみ紙吹雪を表示
+          if state[:confetti_active]
+            begin
+              # グローバル関数createConfettiを呼び出す
+              window.createConfetti
+
+              # 一定時間後に紙吹雪をクリア
+              window.setTimeout(
+                ->{
+                  begin
+                    actions[:clear_confetti].call(state, { actions: actions })
+                  rescue => e
+                    # メソッド内では毎回JS.globalから取得
+                    console = JS.global[:console]
+                    document = JS.global[:document]
+                    console.error("紙吹雪クリア中にエラーが発生しました:", e.to_s)
+                    document_debug = document.getElementById("debug")
+                    document_debug.innerHTML = document_debug.innerHTML + "<div class='error'>紙吹雪クリア中にエラーが発生しました: #{e.message}</div>"
+                  end
+                },
+                5000
+              )
+            rescue => e
+              # メソッド内では毎回JS.globalから取得
+              console = JS.global[:console]
+              document = JS.global[:document]
+              console.error("紙吹雪生成中にエラーが発生しました:", e.to_s)
+              document_debug = document.getElementById("debug")
+              document_debug.innerHTML = document_debug.innerHTML + "<div class='error'>紙吹雪生成中にエラーが発生しました: #{e.message}</div>"
+            end
+          end
+        rescue => e
+          puts "抽選結果設定中にエラーが発生しました: #{e.message}"
+          puts e.backtrace.join("\n")
+        end
       },
 
-      clear_confetti: ->(state, _value) {
-        puts "紙吹雪をクリアします"
-        state[:confetti_active] = false
+      clear_confetti: ->(state, options) {
+        begin
+          actions = options[:actions]
+          puts "紙吹雪をクリアします"
+          state[:confetti_active] = false
+        rescue => e
+          puts "紙吹雪クリア中にRubyでエラーが発生しました: #{e.message}"
+          puts e.backtrace.join("\n")
+        end
       }
     }
 
     # ビュー実装（h関数を使用した実装）
     view = ->(state, actions) {
       puts "ビュー関数が呼ばれました"
+      puts "現在の状態: #{state.inspect}"
 
-      # 結果表示コンテンツの条件分岐
+      # くじ箱の内容
       content = if state[:drawing]
         h(:div, { class: "drawing-animation" }, [
           h(:span, { class: "drawing-text" }, ["抽選中..."])
         ])
       elsif state[:result]
-        # 結果がある場合のプロパティを安全に取得
+        # 結果表示（nullチェック付き）
         color = state[:result][:color] || "linear-gradient(135deg, #E0E0E0, #C0C0C0)"
         animation = state[:result][:animation] || "none"
         icon = state[:result][:icon] || "🎁"
@@ -398,14 +494,17 @@
         ])
       end
 
-      # メインコンテナの構築
+      # ボタンテキスト
+      button_text = state[:drawing] ? "抽選中..." : "くじを引く！"
+
+      # メインコンテナ
       h(:div, { class: "lottery-container" }, [
         h(:h1, {}, ["✨ 夢のくじ引き ✨"]),
         h(:div, { class: "lottery-box" }, [content]),
         h(:button, {
-          onclick: ->(e) { actions[:draw_lottery].call(state, nil) },
-          disabled: state[:drawing]
-        }, [state[:drawing] ? "抽選中..." : "くじを引く！"]),
+          onclick: ->(e) { actions[:draw_lottery].call(state, { actions: actions }) },
+          disabled: state[:drawing] ? true : nil
+        }.compact, [button_text]),
         state[:confetti_active] ? h(:div, { id: "confetti-container" }, []) : nil
       ])
     }
