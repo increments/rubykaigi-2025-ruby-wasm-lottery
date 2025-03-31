@@ -237,6 +237,7 @@
 </head>
 <body>
   <div id="app"></div>
+  <div id="confetti-container"></div>
   <div id="debug"></div>
 
   <script src="https://getty104.github.io/ruby-wasm-vdom/index.js"></script>
@@ -329,9 +330,7 @@
         }
       ],
       result: nil,
-      drawing: false,
-      animation_complete: false,
-      confetti_active: false
+      drawing: false
     }
 
     # アクション定義
@@ -343,7 +342,6 @@
           return if state[:drawing]
 
           state[:drawing] = true
-          state[:animation_complete] = false
           state[:result] = nil
 
           # 抽選アニメーション用のタイマー処理（JS APIを使用）
@@ -392,50 +390,20 @@
           puts "抽選結果を設定します: #{prize[:name]}"
           state[:result] = prize
           state[:drawing] = false
-          state[:animation_complete] = true
-          state[:confetti_active] = true
 
           # 紙吹雪を表示（JS APIを使用）
           log("紙吹雪を表示します")
 
-          # confetti_activeの場合のみ紙吹雪を表示
-          if state[:confetti_active]
-            begin
-              # グローバル関数createConfettiを呼び出す
-              window.createConfetti
-
-              # 一定時間後に紙吹雪をクリア
-              window.setTimeout(
-                ->{
-                  begin
-                    actions[:clear_confetti].call(state, { actions: actions })
-                  rescue => e
-                    # メソッド内では毎回JS.globalから取得
-                    console = JS.global[:console]
-                    console.error("紙吹雪クリア中にエラーが発生しました:", e.to_s)
-                  end
-                },
-                5000
-              )
-            rescue => e
-              # メソッド内では毎回JS.globalから取得
-              console = JS.global[:console]
-              console.error("紙吹雪生成中にエラーが発生しました:", e.to_s)
-            end
+          begin
+            # グローバル関数createConfettiを呼び出す
+            window.createConfetti
+          rescue => e
+            # メソッド内では毎回JS.globalから取得
+            console = JS.global[:console]
+            console.error("紙吹雪生成中にエラーが発生しました:", e.to_s)
           end
         rescue => e
           puts "抽選結果設定中にエラーが発生しました: #{e.message}"
-          puts e.backtrace.join("\n")
-        end
-      },
-
-      clear_confetti: ->(state, options) {
-        begin
-          actions = options[:actions]
-          puts "紙吹雪をクリアします"
-          state[:confetti_active] = false
-        rescue => e
-          puts "紙吹雪クリア中にRubyでエラーが発生しました: #{e.message}"
           puts e.backtrace.join("\n")
         end
       }
@@ -480,8 +448,7 @@
         h(:button, {
           onclick: ->(e) { actions[:draw_lottery].call(state, { actions: actions }) },
           disabled: state[:drawing] ? true : nil
-        }.compact, [button_text]),
-        state[:confetti_active] ? h(:div, { id: "confetti-container" }, []) : nil
+        }.compact, [button_text])
       ])
     }
 
