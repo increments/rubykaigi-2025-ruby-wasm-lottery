@@ -226,7 +226,7 @@
       font-size: 12px;
       max-height: 200px;
       overflow-y: auto;
-      display: block;
+      display: none;
     }
 
     .error {
@@ -242,22 +242,6 @@
   <script src="https://getty104.github.io/ruby-wasm-vdom/index.js"></script>
   <script>
     console.log("JavaScriptが読み込まれました");
-
-    // デバッグ用のエラーハンドラー
-    window.onerror = function(message, source, lineno, colno, error) {
-      console.error("JavaScriptエラー:", message, "行:", lineno, "列:", colno);
-      document.getElementById('debug').style.display = 'block';
-      document.getElementById('debug').innerHTML += "<div style='color:red'>エラー: " + message + "</div>";
-      return true;
-    };
-
-    // Rubyからのログをキャプチャ
-    console.originalLog = console.log;
-    console.log = function() {
-      console.originalLog.apply(console, arguments);
-      document.getElementById('debug').style.display = 'block';
-      document.getElementById('debug').innerHTML += "<div>" + Array.from(arguments).join(' ') + "</div>";
-    };
 
     // 紙吹雪エフェクト用の関数
     function createConfetti() {
@@ -387,8 +371,6 @@
                 actions[:set_result].call(state, { prize: selected_prize, actions: actions })
               rescue => e
                 console.error("抽選処理中にエラーが発生しました:", e.to_s)
-                document_debug = document.getElementById("debug")
-                document_debug.innerHTML = document_debug.innerHTML + "<div class='error'>抽選処理中にエラーが発生しました: #{e.message}</div>"
                 # エラーが発生した場合は抽選状態をリセット
                 state[:drawing] = false
               end
@@ -430,10 +412,7 @@
                   rescue => e
                     # メソッド内では毎回JS.globalから取得
                     console = JS.global[:console]
-                    document = JS.global[:document]
                     console.error("紙吹雪クリア中にエラーが発生しました:", e.to_s)
-                    document_debug = document.getElementById("debug")
-                    document_debug.innerHTML = document_debug.innerHTML + "<div class='error'>紙吹雪クリア中にエラーが発生しました: #{e.message}</div>"
                   end
                 },
                 5000
@@ -441,10 +420,7 @@
             rescue => e
               # メソッド内では毎回JS.globalから取得
               console = JS.global[:console]
-              document = JS.global[:document]
               console.error("紙吹雪生成中にエラーが発生しました:", e.to_s)
-              document_debug = document.getElementById("debug")
-              document_debug.innerHTML = document_debug.innerHTML + "<div class='error'>紙吹雪生成中にエラーが発生しました: #{e.message}</div>"
             end
           end
         rescue => e
