@@ -475,6 +475,69 @@
       JS.global[:console].log(message)
     end
 
+    # monkey-patch for update_element to fix children index bug
+    module RubyWasmVdom::DomManager
+      module Ext
+        def update_element(parent_node, current_node_obj, new_node_obj, current_node_index = 0)
+          # log("update_element called with args: #{[parent_node, current_node_obj, new_node_obj, current_node_index].map(&:inspect).join("\n")}")
+
+          unless current_node_obj
+            parent_node.appendChild(create_element(new_node_obj))
+            return 0
+          end
+
+          current_node = parent_node[:childNodes][current_node_index]
+          # log("Current node: #{current_node.inspect} #{current_node[:textContent]}")
+
+          unless new_node_obj
+            parent_node.removeChild(current_node)
+            # If remove node in multiple children, shift is needed.
+            return -1
+            return 0
+          end
+
+          change_type = change_type(current_node_obj, new_node_obj)
+
+          case change_type
+          when ChangeType::Type, ChangeType::Text, ChangeType::Node
+            parent_node.replaceChild(create_element(new_node_obj), current_node)
+          when ChangeType::Value
+            update_value(
+              current_node,
+              new_node_obj[:attributes][:value]
+            )
+          when ChangeType::Attr
+            update_attributes(
+              current_node,
+              current_node_obj[:attributes],
+              new_node_obj[:attributes]
+            )
+          end
+
+          return 0 unless v_node?(current_node_obj) && v_node?(new_node_obj)
+
+          shift = 0
+          [current_node_obj[:children].size, new_node_obj[:children].size].max.times do |i|
+            current_node_child_obj = i < current_node_obj[:children].size ? current_node_obj[:children][i] : nil
+            new_node_child_obj = i < new_node_obj[:children].size ? new_node_obj[:children][i] : nil
+
+            shift += (update_element(
+              current_node,
+              current_node_child_obj,
+              new_node_child_obj,
+              i + shift,
+            ) || 0)
+          end
+
+          0
+        end
+      end
+
+      class << self
+        prepend Ext
+      end
+    end
+
     log("Ruby JS APIを使用して初期化します")
 
     # 賞品データをData.defineで定義
