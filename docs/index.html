@@ -29,7 +29,7 @@
       padding: 30px;
       text-align: center;
       max-width: 500px;
-      width: 100%;
+      width: fit-content;
       overflow-x: hidden;
       overflow-y: hidden;
       position: relative;
@@ -66,6 +66,9 @@
       overflow: hidden;
       position: relative;
       transition: all 0.3s ease;
+      box-sizing: border-box;
+      width: 100%;
+      padding: 20px 15px;
     }
 
     /* 抽選ボタン */
@@ -101,9 +104,11 @@
       justify-content: center;
       align-items: center;
       border-radius: 10px;
-      padding: 20px;
+      padding: 15px;
       box-shadow: 0 5px 15px rgba(0,0,0,0.1);
       animation: fadeIn 0.5s ease-out;
+      box-sizing: border-box;
+      max-width: 100%;
     }
 
     .prize-icon {
@@ -177,12 +182,13 @@
     .drawing-animation::before {
       content: '';
       position: absolute;
-      width: 150%;
+      width: 120%;
       height: 150%;
       background: linear-gradient(45deg, #55c500, #3fa54a, #e8f5e9, #a5d6a7);
       background-size: 400% 400%;
       animation: gradientShift 3s ease infinite;
       border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+      left: -10%;
     }
 
     @keyframes gradientShift {
@@ -297,6 +303,12 @@
       .lottery-box {
         height: 180px;
         margin-bottom: 20px;
+        padding: 15px 10px;
+      }
+
+      .drawing-animation::before {
+        width: 110%;
+        left: -5%;
       }
 
       button {
@@ -384,7 +396,8 @@
       }
 
       .drawing-animation::before {
-        width: 130%;
+        width: 105%;
+        left: -2.5%;
       }
     }
 
