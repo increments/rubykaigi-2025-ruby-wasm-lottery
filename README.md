@@ -6,7 +6,9 @@ RubyKaigi 2025 Qiitaブース展示用のRuby WebAssemblyデモアプリケー�
 
 [こちらからデモを試せます](https://increments.github.io/rubykaigi-2025-ruby-wasm-lottery/)
 
-![くじ引きデモ画像](https://placehold.jp/55c500/ffffff/400x200.png?text=Ruby%20Wasm%E3%81%8F%E3%81%98%E5%BC%95%E3%81%8D)
+## Source Code
+
+[docs/index.html](docs/index.html)
 
 ## 特徴
 
