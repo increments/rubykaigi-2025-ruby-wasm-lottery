@@ -6,6 +6,10 @@
   <title>Ruby Wasmくじ引き</title>
   <style>
     /* ベーススタイル */
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       font-family: 'Rounded Mplus 1c', 'Hiragino Kaku Gothic ProN', sans-serif;
       background: #f6f6f6;
@@ -15,6 +19,7 @@
       align-items: center;
       margin: 0;
       padding: 20px;
+      overflow-x: hidden;
     }
 
     .lottery-container {
@@ -25,7 +30,8 @@
       text-align: center;
       max-width: 500px;
       width: 100%;
-      overflow: hidden;
+      overflow-x: hidden;
+      overflow-y: hidden;
       position: relative;
     }
 
@@ -346,6 +352,8 @@
 
       .lottery-box {
         height: 160px;
+        width: 100%;
+        padding: 10px 5px;
       }
 
       .github-corner {
@@ -368,6 +376,15 @@
 
       .prize-description {
         font-size: 12px;
+      }
+
+      .result {
+        width: calc(100% - 10px);
+        padding: 15px 5px;
+      }
+
+      .drawing-animation::before {
+        width: 130%;
       }
     }
 
