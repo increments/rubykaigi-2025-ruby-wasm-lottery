@@ -6,6 +6,10 @@
   <title>Ruby Wasmくじ引き</title>
   <style>
     /* ベーススタイル */
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       font-family: 'Rounded Mplus 1c', 'Hiragino Kaku Gothic ProN', sans-serif;
       background: #f6f6f6;
@@ -15,6 +19,7 @@
       align-items: center;
       margin: 0;
       padding: 20px;
+      overflow-x: hidden;
     }
 
     .lottery-container {
@@ -24,8 +29,9 @@
       padding: 30px;
       text-align: center;
       max-width: 500px;
-      width: 100%;
-      overflow: hidden;
+      width: fit-content;
+      overflow-x: hidden;
+      overflow-y: hidden;
       position: relative;
     }
 
@@ -60,6 +66,9 @@
       overflow: hidden;
       position: relative;
       transition: all 0.3s ease;
+      box-sizing: border-box;
+      width: 100%;
+      padding: 20px 15px;
     }
 
     /* 抽選ボタン */
@@ -95,9 +104,11 @@
       justify-content: center;
       align-items: center;
       border-radius: 10px;
-      padding: 20px;
+      padding: 15px;
       box-shadow: 0 5px 15px rgba(0,0,0,0.1);
       animation: fadeIn 0.5s ease-out;
+      box-sizing: border-box;
+      max-width: 100%;
     }
 
     .prize-icon {
@@ -171,12 +182,13 @@
     .drawing-animation::before {
       content: '';
       position: absolute;
-      width: 150%;
+      width: 120%;
       height: 150%;
       background: linear-gradient(45deg, #55c500, #3fa54a, #e8f5e9, #a5d6a7);
       background-size: 400% 400%;
       animation: gradientShift 3s ease infinite;
       border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+      left: -10%;
     }
 
     @keyframes gradientShift {
@@ -291,6 +303,12 @@
       .lottery-box {
         height: 180px;
         margin-bottom: 20px;
+        padding: 15px 10px;
+      }
+
+      .drawing-animation::before {
+        width: 110%;
+        left: -5%;
       }
 
       button {
@@ -346,6 +364,8 @@
 
       .lottery-box {
         height: 160px;
+        width: 100%;
+        padding: 10px 5px;
       }
 
       .github-corner {
@@ -368,6 +388,16 @@
 
       .prize-description {
         font-size: 12px;
+      }
+
+      .result {
+        width: calc(100% - 10px);
+        padding: 15px 5px;
+      }
+
+      .drawing-animation::before {
+        width: 105%;
+        left: -2.5%;
       }
     }
 
