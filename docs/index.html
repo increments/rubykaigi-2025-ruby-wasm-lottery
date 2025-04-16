@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ruby Wasmくじ引き</title>
+  <title>ruby.wasmくじ引き</title>
   <style>
     /* ベーススタイル */
     * {
@@ -706,14 +706,14 @@
 
       # メインコンテナ
       h(:div, { class: "lottery-container" }, [
-        h(:h1, {}, ["✨ Ruby Wasmくじ引き ✨"]),
+        h(:h1, {}, ["✨ ruby.wasmくじ引き ✨"]),
         h(:div, { class: "lottery-box" }, [content]),
         h(:button, {
           onclick: ->(e) { actions[:draw_lottery].call(state, { actions: actions }) },
           disabled: state[:drawing] ? true : nil
         }.compact, [button_text]),
         h(:div, { class: "event-info" }, [
-          "RubyKaigi 2025 Qiitaブース展示 - ruby-wasm-vdomデモアプリケーション - Authored by Cline and Qiita developers"
+          "RubyKaigi 2025 Qiitaブース展示 - ruby.wasmとruby-wasm-vdomによるデモアプリケーション - Authored by Cline and Qiita developers"
         ])
       ])
     }

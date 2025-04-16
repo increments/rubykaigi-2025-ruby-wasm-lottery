@@ -1,8 +1,8 @@
-# Ruby Wasmくじ引き
+# ruby.wasmくじ引き
 
 [![GitHub](https://img.shields.io/badge/GitHub-increments%2Frubykaigi--2025--ruby--wasm--lottery-green?style=flat-square&logo=github)](https://github.com/increments/rubykaigi-2025-ruby-wasm-lottery)
 
-RubyKaigi 2025 Qiitaブース展示用のRuby WebAssemblyデモアプリケーションです。ruby-wasm-vdomを使用したインタラクティブなくじ引きゲームを実装しています。
+RubyKaigi 2025 Qiitaブース展示用のruby.wasmデモアプリケーションです。ruby-wasm-vdomを使用したインタラクティブなくじ引きゲームを実装しています。
 
 [こちらからデモを試せます](https://increments.github.io/rubykaigi-2025-ruby-wasm-lottery/)
 
@@ -12,7 +12,7 @@ RubyKaigi 2025 Qiitaブース展示用のRuby WebAssemblyデモアプリケー�
 
 ## 特徴
 
-- **Ruby Wasm**: ブラウザ上でRubyコードを実行
+- **ruby.wasm**: ブラウザ上でRubyコードを実行
 - **Virtual DOM**: 効率的なDOM更新による高速なUIレンダリング
 - **インタラクティブ抽選**: 確率ベースのくじ引きロジック
 - **アニメーション効果**: 抽選中の動的な視覚効果と紙吹雪
@@ -26,7 +26,7 @@ RubyKaigi 2025 Qiitaブース展示用のRuby WebAssemblyデモアプリケー�
 
 ## 技術スタック
 
-- [Ruby Wasm](https://github.com/ruby/ruby.wasm): ブラウザで実行可能なRuby
+- [ruby.wasm](https://github.com/ruby/ruby.wasm): ブラウザで実行可能なRuby
 - [ruby-wasm-vdom](https://github.com/getty104/ruby-wasm-vdom): Ruby WasmとVirtual DOMの統合
 - HTML5 / CSS3: モダンなUI実装
 - JavaScript: ブラウザAPIとのインターフェース
