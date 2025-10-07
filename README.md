@@ -42,6 +42,8 @@ RubyKaigi 2025 Qiitaブース展示用のruby.wasmデモアプリケーション
 
 Clineはプロジェクトの計画段階から実装まで一貫してサポートし、ruby-wasm-vdomの特性を活かしたアプリケーション開発を可能にしました。
 
+開発プロセスの詳細については、[解説スライド](https://speakerdeck.com/tomoasleep/rubykaigi-2025-sponsor-wasm-lottery-recap)をご覧ください。
+
 ## 動作環境
 
 - モダンなWebブラウザ (Chrome, Firefox, Safari, Edgeの最新版)
